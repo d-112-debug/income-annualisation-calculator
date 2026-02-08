@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income Annualisation Calculator</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f9; color: #333; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { color: #003366; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1em; }
+        button { width: 100%; padding: 12px; background-color: #003366; color: white; border: none; border-radius: 4px; font-size: 1.1em; cursor: pointer; transition: background 0.3s; margin-bottom: 10px; }
+        button:hover { background-color: #002244; }
+        .results { margin-top: 20px; padding: 15px; background: #eef4f8; border-radius: 4px; display: none; }
+        .result-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1em; }
+        .result-row.total { border-top: 1px solid #ccc; padding-top: 10px; font-weight: bold; color: #003366; font-size: 1.1em; }
+        .copy-box { background: #fff; border: 1px dashed #003366; padding: 10px; font-family: monospace; font-size: 0.85em; white-space: pre-wrap; margin-top: 15px; }
+        .highlight { color: #d9534f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Income Calculator</h2>
+    
+    <div class="input-group">
+        <label>Pay Frequency</label>
+        <select id="freq" onchange="toggleHoursLabel()">
+            <option value="26">Fortnightly</option>
+            <option value="52">Weekly</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label id="hoursLabel">Base Hours per Fortnight</label>
+        <input type="number" id="baseHours" step="0.1">
+    </div>
+
+    <div class="input-group">
+        <label>Base Hourly Rate ($)</label>
+        <input type="number" id="hourlyRate" step="0.01">
+    </div>
+
+    <hr>
+
+    <div class="input-group">
+        <label>Start Date / Start of FY</label>
+        <input type="date" id="startDate" value="2025-07-01">
+    </div>
+
+    <div class="input-group">
+        <label>Latest Pay Date</label>
+        <input type="date" id="endDate">
+    </div>
+
+    <div class="input-group">
+        <label>YTD Gross Income ($)</label>
+        <input type="number" id="ytdIncome" step="0.01">
+    </div>
+
+    <button onclick="calculate()">Calculate Annualisation</button>
+
+    <div id="results" class="results">
+        <div class="result-row">
+            <span>Rounded Periods:</span>
+            <span id="resPeriods">0</span>
+        </div>
+        <div class="result-row">
+            <span>Base Annual Income:</span>
+            <span id="resBase">$0.00</span>
+        </div>
+        <div class="result-row">
+            <span>Annualised YTD Total:</span>
+            <span id="resAnnualised">$0.00</span>
+        </div>
+        <div class="result-row total">
+            <span>Non-Base Income:</span>
+            <span id="resNonBase" class="highlight">$0.00</span>
+        </div>
+        
+        <label style="margin-top:15px;">Note:</label>
+        <div id="copyBox" class="copy-box"></div>
+    </div>
+</div>
+
+<script>
+    function toggleHoursLabel() {
+        const freq = document.getElementById('freq').value;
+        document.getElementById('hoursLabel').innerText = freq == "26" ? "Base Hours per Fortnight" : "Base Hours per Week";
+    }
+
+    function calculate() {
+        const freq = parseFloat(document.getElementById('freq').value);
+        const freqText = freq == 26 ? "Fortnightly" : "Weekly";
+        const rate = parseFloat(document.getElementById('hourlyRate').value);
+        const hours = parseFloat(document.getElementById('baseHours').value);
+        const ytd = parseFloat(document.getElementById('ytdIncome').value);
+        const start = new Date(document.getElementById('startDate').value);
+        const endDateInput = document.getElementById('endDate').value;
+        const end = new Date(endDateInput);
+
+        const basePayPer = rate * hours;
+        const baseAnnual = basePayPer * freq;
+
+        const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24));
+        const periodDivisor = freq == 52 ? 7 : 14;
+        const roundedPeriods = Math.ceil(diffDays / periodDivisor);
+
+        const annualisedTotal = (ytd / roundedPeriods) * freq;
+        const nonBase = annualisedTotal - baseAnnual;
+
+        const fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+        
+        document.getElementById('resPeriods').innerText = roundedPeriods + (freq == 26 ? " Fortnights" : " Weeks");
+        document.getElementById('resBase').innerText = fmt.format(baseAnnual);
+        document.getElementById('resAnnualised').innerText = fmt.format(annualisedTotal);
+        document.getElementById('resNonBase').innerText = fmt.format(nonBase);
+        
+        // Generate the text note
+        const note = `Pay Frequency: ${freqText}
+Base Hour per ${freqText}: ${hours}
+Base Rate: ${fmt.format(rate)}
+Base Pay Per ${freqText}: ${fmt.format(basePayPer)}
+Pay Date: ${endDateInput.split('-').reverse().join('/')}
+YTD Gross: ${fmt.format(ytd)}
+Base Annual Income: ${fmt.format(baseAnnual)}
+Annualised YTD Total: ${fmt.format(annualisedTotal)}
+Non-Base Income: ${fmt.format(nonBase)}`;
+        
+        document.getElementById('copyBox').innerText = note;
+        document.getElementById('results').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
