@@ -1,0 +1,303 @@
+
+<style>
+  * { box-sizing: border-box; }
+  .cs-wrap { font-family: var(--font-sans); padding: 1rem 0; }
+  .cs-tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--color-border-secondary); margin-bottom: 1.5rem; }
+  .cs-tab { padding: 8px 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -0.5px; transition: color .15s; }
+  .cs-tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); }
+  .cs-tab:hover:not(.active) { color: var(--color-text-primary); }
+  .cs-panel { display: none; }
+  .cs-panel.active { display: block; }
+
+  .lender-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .lender-badge { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: var(--border-radius-md); }
+  .badge-plenti { background: var(--color-background-info); color: var(--color-text-info); }
+  .badge-firstmac { background: var(--color-background-success); color: var(--color-text-success); }
+
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 1.25rem 0 .5rem; }
+  
+  table.rate-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.rate-table th { font-weight: 500; font-size: 11px; color: var(--color-text-secondary); padding: 5px 8px; border-bottom: 0.5px solid var(--color-border-secondary); text-align: left; }
+  table.rate-table td { padding: 6px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: middle; color: var(--color-text-primary); }
+  table.rate-table tr:last-child td { border-bottom: none; }
+  table.rate-table .rate { font-weight: 500; }
+  table.rate-table .loading { font-size: 12px; color: var(--color-text-danger); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .info-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+  .info-card .label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 3px; }
+  .info-card .val { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .info-card .val-sm { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; margin: 2px 2px 2px 0; font-weight: 500; }
+  .pill-blue { background: var(--color-background-info); color: var(--color-text-info); }
+  .pill-green { background: var(--color-background-success); color: var(--color-text-success); }
+  .pill-amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .pill-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+  .pill-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+
+  .two-col-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; font-size: 13px; }
+  .two-col-list li { list-style: none; padding: 3px 0; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
+  .two-col-list li span { color: var(--color-text-secondary); font-size: 12px; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); overflow: hidden; }
+  .compare-col { padding: 0; }
+  .compare-col:first-child { border-right: 0.5px solid var(--color-border-secondary); }
+  .compare-head { padding: 10px 14px 8px; font-size: 12px; font-weight: 500; background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-secondary); }
+  .compare-item { padding: 8px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 12px; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item .ci-label { color: var(--color-text-secondary); font-size: 11px; margin-bottom: 2px; }
+  .compare-item .ci-val { color: var(--color-text-primary); font-weight: 500; }
+
+  .choose-card { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); overflow: hidden; margin-bottom: 12px; }
+  .choose-card-head { padding: 10px 16px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .choose-card-head.plenti-head { background: var(--color-background-info); color: var(--color-text-info); }
+  .choose-card-head.first-head { background: var(--color-background-success); color: var(--color-text-success); }
+  .choose-card-body { padding: 12px 16px; }
+  .use-case { display: flex; gap: 10px; padding: 6px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+  .use-case:last-child { border-bottom: none; }
+  .use-case .uc-icon { font-size: 14px; flex-shrink: 0; width: 20px; }
+  .use-case .uc-text { color: var(--color-text-primary); }
+  .use-case .uc-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+  
+  .tick { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--color-background-success); color: var(--color-text-success); font-size: 10px; text-align: center; line-height: 14px; font-weight: 700; margin-right: 4px; flex-shrink: 0; }
+  .cross { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--color-background-danger); color: var(--color-text-danger); font-size: 10px; text-align: center; line-height: 14px; font-weight: 700; margin-right: 4px; flex-shrink: 0; }
+</style>
+
+<div class="cs-wrap">
+  <div class="cs-tabs">
+    <button class="cs-tab active" onclick="showTab('plenti')">Plenti Classic</button>
+    <button class="cs-tab" onclick="showTab('firstmac')">Firstmac</button>
+    <button class="cs-tab" onclick="showTab('compare')">Side by side</button>
+    <button class="cs-tab" onclick="showTab('choose')">Who to use when</button>
+  </div>
+
+  <!-- PLENTI -->
+  <div class="cs-panel active" id="tab-plenti">
+    <div class="lender-header">
+      <span class="lender-badge badge-plenti">Plenti Classic — 18 Mar 2026</span>
+    </div>
+
+    <div class="section-title">Standard rates (asset backed)</div>
+    <table class="rate-table">
+      <tr><th>Build year</th><th>Asset backed</th><th>Non-asset T1 (750+)</th><th>Non-asset T2 (600+)</th><th>Non-asset T3 (525+)</th></tr>
+      <tr><td>2026–2023</td><td class="rate">6.99%</td><td class="rate">8.25%</td><td class="rate">8.95%</td><td class="rate">11.09%</td></tr>
+      <tr><td>2022–2014†</td><td class="rate">7.69%</td><td class="rate">9.49%</td><td class="rate">10.05%</td><td class="rate">12.29%</td></tr>
+      <tr><td>2013–2009 (3–5yr only)</td><td class="rate">9.69%</td><td class="rate">11.49%</td><td class="rate">12.05%</td><td class="rate">14.29%</td></tr>
+      <tr><td colspan="5" class="loading">Loadings: term &gt;5yrs +0.50% · †asset end-of-term age &gt;15yrs +2.00% · Green EV −0.50%</td></tr>
+    </table>
+
+    <div class="section-title">Key fees &amp; terms</div>
+    <div class="grid3">
+      <div class="info-card"><div class="label">Credit assist. fee</div><div class="val">$599</div></div>
+      <div class="info-card"><div class="label">Monthly fee</div><div class="val">$14.90</div></div>
+      <div class="info-card"><div class="label">Origination fee</div><div class="val">By accreditation</div></div>
+      <div class="info-card"><div class="label">Loan amount</div><div class="val-sm">Car/Caravan $5k–$150k<br>Moto $5k–$50k</div></div>
+      <div class="info-card"><div class="label">Loan terms</div><div class="val">2–7 years</div></div>
+      <div class="info-card"><div class="label">Repayment</div><div class="val-sm">Monthly direct debit</div></div>
+    </div>
+
+    <div class="section-title">Balloon payments (car)</div>
+    <table class="rate-table">
+      <tr><th>Loan term (months)</th><th>Max balloon</th></tr>
+      <tr><td>24–36 months</td><td class="rate">50%</td></tr>
+      <tr><td>37–48 months</td><td class="rate">45%</td></tr>
+      <tr><td>49–60 months</td><td class="rate">35%</td></tr>
+      <tr><td>60+ months</td><td class="rate">0%</td></tr>
+    </table>
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:4px 0 0">No balloon: terms &gt;60m · asset age &gt;10yrs at end · caravans/motorcycles</p>
+
+    <div class="section-title">LVR policy</div>
+    <table class="rate-table">
+      <tr><th>Scenario</th><th>Max LVR</th></tr>
+      <tr><td>T1/T2 dealer sale</td><td class="rate">180%</td></tr>
+      <tr><td>T1/T2 private sale</td><td class="rate">150%</td></tr>
+      <tr><td>T1/T2 refinance</td><td class="rate">130%</td></tr>
+      <tr><td>Equifax &lt;600 or thin file</td><td class="rate">150%</td></tr>
+    </table>
+
+    <div class="section-title">Eligibility snapshot</div>
+    <ul class="two-col-list">
+      <li>Min credit score <span>525 car · 600 caravan/moto/EV</span></li>
+      <li>Min age <span>21 years</span></li>
+      <li>Min income <span>$35,000 p.a. gross</span></li>
+      <li>Credit file age <span>12 months minimum</span></li>
+      <li>Full time employment <span>3 months</span></li>
+      <li>Self-employed <span>12 months</span></li>
+      <li>Casual/fixed contract <span>6 months</span></li>
+      <li>Max vehicle age at start <span>17 years</span></li>
+      <li>Max vehicle age at end <span>20 years</span></li>
+      <li>Residency <span>AU/NZ citizen, PR or approved visa</span></li>
+      <li>Borrower type <span>Single applicant only</span></li>
+      <li>PTI (T1/T2 owner) <span>&lt;25% net monthly income</span></li>
+    </ul>
+
+    <div class="section-title">Special products</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:12px;">
+      <span class="pill pill-green">Green EV −0.50%</span>
+      <span class="pill pill-blue">Caravan (T1/T2 only)</span>
+      <span class="pill pill-blue">Motorcycle (T1/T2 only)</span>
+      <span class="pill pill-amber">Refinance (6m history)</span>
+      <span class="pill pill-amber">Private sale (inspection req.)</span>
+      <span class="pill pill-amber">Mid-term refinance</span>
+    </div>
+  </div>
+
+  <!-- FIRSTMAC -->
+  <div class="cs-panel" id="tab-firstmac">
+    <div class="lender-header">
+      <span class="lender-badge badge-firstmac">Firstmac — Effective 12 Feb 2026</span>
+    </div>
+
+    <div class="section-title">Fixed rates</div>
+    <table class="rate-table">
+      <tr><th>Car type</th><th>Rate p.a.</th><th>Build year</th></tr>
+      <tr><td>New green car</td><td class="rate">7.39%</td><td>2025–2026</td></tr>
+      <tr><td>New / Demo</td><td class="rate">7.69%</td><td>2025–2026</td></tr>
+      <tr><td>Used &lt;3 yrs</td><td class="rate">8.19%</td><td>2023–2026</td></tr>
+      <tr><td>Used &lt;5 yrs</td><td class="rate">8.49%</td><td>2021–2022</td></tr>
+      <tr><td>Used 6–7 yrs</td><td class="rate">9.09%</td><td>2019–2020</td></tr>
+      <tr><td>Used 8–12 yrs</td><td class="rate">13.79%</td><td>2014–2018</td></tr>
+      <tr><td colspan="3" class="loading">Loadings: Edge (≤7yrs) +1.50% · Non-home owner +1.20%</td></tr>
+    </table>
+
+    <div class="section-title">Variable rates</div>
+    <table class="rate-table">
+      <tr><th>Car type</th><th>Rate p.a.</th><th>Build year</th></tr>
+      <tr><td>New green car</td><td class="rate">7.19%</td><td>2025–2026</td></tr>
+      <tr><td>New / Demo</td><td class="rate">7.34%</td><td>2025–2026</td></tr>
+      <tr><td>Used &lt;3 yrs</td><td class="rate">7.84%</td><td>2023–2026</td></tr>
+      <tr><td>Used &lt;5 yrs</td><td class="rate">7.99%</td><td>2021–2022</td></tr>
+      <tr><td>Used 6–7 yrs</td><td class="rate">8.99%</td><td>2019–2020</td></tr>
+      <tr><td>Used 8–12 yrs</td><td class="rate">13.39%</td><td>2014–2018</td></tr>
+      <tr><td colspan="3" class="loading">Loadings: Edge (≤7yrs) +1.50% · Non-home owner +1.20% · Redraw available on variable only</td></tr>
+    </table>
+
+    <div class="section-title">Key fees &amp; terms</div>
+    <div class="grid3">
+      <div class="info-card"><div class="label">Application fee</div><div class="val-sm">$499 dealer<br>$599 private</div></div>
+      <div class="info-card"><div class="label">Monthly fee</div><div class="val">$8</div></div>
+      <div class="info-card"><div class="label">Discharge fee</div><div class="val">$0</div></div>
+      <div class="info-card"><div class="label">Early exit (variable)</div><div class="val">$0</div></div>
+      <div class="info-card"><div class="label">Early exit (fixed)</div><div class="val-sm">$700 yr1–2<br>$500 subsequent</div></div>
+      <div class="info-card"><div class="label">Broker commission</div><div class="val">2% NAF + GST</div></div>
+      <div class="info-card"><div class="label">Loan amount</div><div class="val-sm">$10k–$150k<br>8+yr cars: $50k max</div></div>
+      <div class="info-card"><div class="label">Loan terms</div><div class="val">3–7 years</div></div>
+      <div class="info-card"><div class="label">Max vehicle age</div><div class="val-sm">12yrs at start<br>15yrs at end</div></div>
+    </div>
+
+    <div class="section-title">Auto max balloons (fixed rate only)</div>
+    <table class="rate-table">
+      <tr><th>Term</th><th>New/Demo</th><th>Used (&lt;4 yrs)</th></tr>
+      <tr><td>3 years</td><td class="rate">50%</td><td class="rate">40%</td></tr>
+      <tr><td>4 years</td><td class="rate">40%</td><td class="rate">30%</td></tr>
+      <tr><td>5 years</td><td class="rate">30%</td><td class="rate">20%</td></tr>
+    </table>
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:4px 0 0">No balloon on terms &gt;5 years</p>
+
+    <div class="section-title">Key features</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:12px;">
+      <span class="pill pill-green">Green EV discount</span>
+      <span class="pill pill-blue">Variable rate redraw</span>
+      <span class="pill pill-blue">Refinance available</span>
+      <span class="pill pill-blue">Private sale available</span>
+      <span class="pill pill-amber">No early exit (variable)</span>
+      <span class="pill pill-gray">Cars only (no caravans/motos)</span>
+      <span class="pill pill-gray">New/demo accepted</span>
+    </div>
+  </div>
+
+  <!-- COMPARE -->
+  <div class="cs-panel" id="tab-compare">
+    <div class="section-title">Head-to-head comparison</div>
+    <div class="compare-grid">
+      <div class="compare-col">
+        <div class="compare-head" style="color:var(--color-text-info)">Plenti Classic</div>
+        <div class="compare-item"><div class="ci-label">Min loan</div><div class="ci-val">$5,000</div></div>
+        <div class="compare-item"><div class="ci-label">Max loan (car)</div><div class="ci-val">$150,000</div></div>
+        <div class="compare-item"><div class="ci-label">Loan terms</div><div class="ci-val">2–7 years</div></div>
+        <div class="compare-item"><div class="ci-label">Monthly fee</div><div class="ci-val">$14.90</div></div>
+        <div class="compare-item"><div class="ci-label">Credit assist / app fee</div><div class="ci-val">$599</div></div>
+        <div class="compare-item"><div class="ci-label">Min credit score</div><div class="ci-val">525 (car)</div></div>
+        <div class="compare-item"><div class="ci-label">Borrower types</div><div class="ci-val">Single only</div></div>
+        <div class="compare-item"><div class="ci-label">Max vehicle age (start)</div><div class="ci-val">17 years</div></div>
+        <div class="compare-item"><div class="ci-label">Max vehicle age (end)</div><div class="ci-val">20 years</div></div>
+        <div class="compare-item"><div class="ci-label">EV rate</div><div class="ci-val">−0.50% discount</div></div>
+        <div class="compare-item"><div class="ci-label">Rate type</div><div class="ci-val">Fixed only</div></div>
+        <div class="compare-item"><div class="ci-label">Non-homeowner loading</div><div class="ci-val">Tier-based (no flat loading)</div></div>
+        <div class="compare-item"><div class="ci-label">Caravans</div><div class="ci-val">Yes (T1/T2)</div></div>
+        <div class="compare-item"><div class="ci-label">Motorcycles</div><div class="ci-val">Yes (T1/T2)</div></div>
+        <div class="compare-item"><div class="ci-label">New/demo cars</div><div class="ci-val">Yes (covered by 2026–2023)</div></div>
+        <div class="compare-item"><div class="ci-label">Balloon (max, short term)</div><div class="ci-val">50% (24–36m)</div></div>
+        <div class="compare-item"><div class="ci-label">Min income</div><div class="ci-val">$35k p.a.</div></div>
+        <div class="compare-item"><div class="ci-label">Early exit fee</div><div class="ci-val">Nil stated</div></div>
+        <div class="compare-item"><div class="ci-label">Broker commission</div><div class="ci-val">By accreditation</div></div>
+      </div>
+      <div class="compare-col">
+        <div class="compare-head" style="color:var(--color-text-success)">Firstmac</div>
+        <div class="compare-item"><div class="ci-label">Min loan</div><div class="ci-val">$10,000</div></div>
+        <div class="compare-item"><div class="ci-label">Max loan (car)</div><div class="ci-val">$150,000</div></div>
+        <div class="compare-item"><div class="ci-label">Loan terms</div><div class="ci-val">3–7 years</div></div>
+        <div class="compare-item"><div class="ci-label">Monthly fee</div><div class="ci-val">$8.00</div></div>
+        <div class="compare-item"><div class="ci-label">Credit assist / app fee</div><div class="ci-val">$499 dealer · $599 private</div></div>
+        <div class="compare-item"><div class="ci-label">Min credit score</div><div class="ci-val">Not publicly tiered</div></div>
+        <div class="compare-item"><div class="ci-label">Borrower types</div><div class="ci-val">Not restricted to single</div></div>
+        <div class="compare-item"><div class="ci-label">Max vehicle age (start)</div><div class="ci-val">12 years</div></div>
+        <div class="compare-item"><div class="ci-label">Max vehicle age (end)</div><div class="ci-val">15 years</div></div>
+        <div class="compare-item"><div class="ci-label">EV rate</div><div class="ci-val">Green car discount (7.19% var)</div></div>
+        <div class="compare-item"><div class="ci-label">Rate type</div><div class="ci-val">Fixed &amp; variable</div></div>
+        <div class="compare-item"><div class="ci-label">Non-homeowner loading</div><div class="ci-val">Flat +1.20%</div></div>
+        <div class="compare-item"><div class="ci-label">Caravans</div><div class="ci-val">No</div></div>
+        <div class="compare-item"><div class="ci-label">Motorcycles</div><div class="ci-val">No</div></div>
+        <div class="compare-item"><div class="ci-label">New/demo cars</div><div class="ci-val">Yes (specific rate category)</div></div>
+        <div class="compare-item"><div class="ci-label">Balloon (max, short term)</div><div class="ci-val">50% new/demo (3yr fixed)</div></div>
+        <div class="compare-item"><div class="ci-label">Min income</div><div class="ci-val">Not specified in rate sheet</div></div>
+        <div class="compare-item"><div class="ci-label">Early exit fee</div><div class="ci-val">$0 variable · $700 fixed yr1–2</div></div>
+        <div class="compare-item"><div class="ci-label">Broker commission</div><div class="ci-val">2% NAF + GST</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHOOSE -->
+  <div class="cs-panel" id="tab-choose">
+    <div class="choose-card">
+      <div class="choose-card-head first-head">Use Firstmac when…</div>
+      <div class="choose-card-body">
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Client wants a variable rate with redraw</div><div class="uc-sub">Only lender offering variable + redraw facility</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">New or near-new car (2025–2026 build)</div><div class="uc-sub">Dedicated New/Demo pricing category; 7.34% variable vs Plenti's 6.99% fixed — but adds redraw &amp; flexibility</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Strong homeowner wanting lowest monthly ongoing cost</div><div class="uc-sub">$8/month vs Plenti's $14.90 saves ~$82/yr</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Client may want to exit early (variable rate)</div><div class="uc-sub">$0 early exit on variable — Plenti does not advertise this</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Dealer purchase where app fee saving matters</div><div class="uc-sub">$499 dealer app fee vs Plenti's $599 credit assist. fee</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Transparent, consistent broker commission</div><div class="uc-sub">Fixed 2% NAF + GST — no accreditation guesswork</div></div></div>
+      </div>
+    </div>
+
+    <div class="choose-card">
+      <div class="choose-card-head plenti-head">Use Plenti when…</div>
+      <div class="choose-card-body">
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Older vehicle (2013–2009 build, up to 17 yrs old)</div><div class="uc-sub">Plenti accepts up to 17yr at start / 20yr at end; Firstmac caps at 12yr start / 15yr end</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Caravan or motorcycle finance needed</div><div class="uc-sub">Firstmac is cars only; Plenti covers both asset types</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Smaller loan under $10,000</div><div class="uc-sub">Plenti starts at $5k; Firstmac minimum is $10k</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Lower credit score (525–599)</div><div class="uc-sub">Plenti has explicit Tier 3 pricing from 525; Firstmac doesn't publish a tiered floor</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Shorter loan term needed (2 years)</div><div class="uc-sub">Plenti offers 2yr terms; Firstmac minimum is 3 years</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Electric vehicle — asset-backed borrower</div><div class="uc-sub">Plenti 6.49% (6.99 − 0.50) asset backed EV vs Firstmac 7.19% variable green car</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Non-homeowner without hitting a flat loading</div><div class="uc-sub">Plenti uses credit tiers not a blanket +1.20%; strong non-owners fare better</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Asset-backed client wanting lowest headline rate</div><div class="uc-sub">6.99% asset-backed 2023–2026 is Plenti's sharpest rate and competitive on newer cars</div></div></div>
+        <div class="use-case"><div class="tick">✓</div><div><div class="uc-text">Private sale with higher balloon flexibility</div><div class="uc-sub">Plenti balloons up to 45–50% on 37–48 month terms vs Firstmac's 30–40% on used cars</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.cs-tab').forEach((t,i) => t.classList.remove('active'));
+  document.querySelectorAll('.cs-panel').forEach(p => p.classList.remove('active'));
+  const tabs = ['plenti','firstmac','compare','choose'];
+  document.querySelectorAll('.cs-tab')[tabs.indexOf(id)].classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+</script>
